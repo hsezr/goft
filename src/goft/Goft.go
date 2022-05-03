@@ -1,7 +1,6 @@
 package goft
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/gin-gonic/gin"
@@ -9,7 +8,7 @@ import (
 
 type Goft struct {
 	*gin.Engine
-	RG *gin.RouterGroup
+	RG  *gin.RouterGroup
 	dba interface{}
 }
 
@@ -30,7 +29,6 @@ func (this *Goft) Mount(group string, classes ...IClass) *Goft {
 		vClass := reflect.ValueOf(class).Elem()
 		if vClass.NumField() > 0 {
 			if this.dba != nil {
-				fmt.Println(vClass.Field(0).Type())
 				vClass.Field(0).Set(reflect.New(vClass.Field(0).Type().Elem()))
 				vClass.Field(0).Elem().Set(reflect.ValueOf(this.dba).Elem())
 			}
