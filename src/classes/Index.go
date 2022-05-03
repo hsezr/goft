@@ -1,7 +1,7 @@
 package classes
 
 import (
-	"mygin/src/goft"
+	"mygin/goft"
 
 	"github.com/gin-gonic/gin"
 )

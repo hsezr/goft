@@ -1,8 +1,8 @@
 package classes
 
 import (
-	"mygin/src/goft"
-	"mygin/src/models"
+	"mygin/goft"
+	"mygin/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +23,7 @@ func (this *UserClass) UserDetail(ctx *gin.Context) goft.Model {
 	user := models.NewUserModel()
 	err := ctx.BindUri(user)
 	goft.Error(err, "ID参数不合法")
+	this.Table("users").Where("user_id=?", user.UserId).Find(user)
 	return user
 }
 

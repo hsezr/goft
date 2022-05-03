@@ -9,11 +9,11 @@ import (
 type Goft struct {
 	*gin.Engine
 	RG  *gin.RouterGroup
-	dba interface{}
+	props []interface{}
 }
 
 func Ignite() *Goft {
-	g := &Goft{Engine: gin.New()}
+	g := &Goft{Engine: gin.New(), props: make([]interface{}, 0)}
 	g.Use(ErrorHandler())
 	return g
 }
@@ -26,13 +26,7 @@ func (this *Goft) Mount(group string, classes ...IClass) *Goft {
 	this.RG = this.Group(group)
 	for _, class := range classes {
 		class.Build(this)
-		vClass := reflect.ValueOf(class).Elem()
-		if vClass.NumField() > 0 {
-			if this.dba != nil {
-				vClass.Field(0).Set(reflect.New(vClass.Field(0).Type().Elem()))
-				vClass.Field(0).Elem().Set(reflect.ValueOf(this.dba).Elem())
-			}
-		}
+		this.setProp(class)
 	}
 
 	return this
@@ -59,7 +53,32 @@ func (this *Goft) Attach(f Fairing) *Goft {
 }
 
 //设定数据库连接对象
-func (this *Goft) DB(dba interface{}) *Goft {
-	this.dba = dba
+func (this *Goft) Beans(beans ...interface{}) *Goft {
+	this.props = append(this.props, beans...) 
 	return this
+}
+
+func (this *Goft) getProp(t reflect.Type) interface{} {
+	for _, p := range this.props {
+		if t == reflect.TypeOf(p) {
+			return p
+		}
+	}
+	return nil
+}
+
+
+func (this *Goft) setProp(class IClass) {
+	vClass := reflect.ValueOf(class).Elem()
+	for i := 0; i < vClass.NumField(); i++ {
+		f := vClass.Field(i)
+		if !f.IsNil() || f.Kind() != reflect.Ptr {
+			continue
+		}
+
+		if p := this.getProp(f.Type()); p != nil {
+			f.Set(reflect.New(vClass.Field(0).Type().Elem()))
+			f.Elem().Set(reflect.ValueOf(p).Elem())
+		}
+	}
 }
