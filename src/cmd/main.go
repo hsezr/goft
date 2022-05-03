@@ -9,6 +9,7 @@ import (
 func main() {
 	goft.
 		Ignite().
+		DB(goft.NewGormAdapter()).
 		Attach(NewUserMid()).
 		Mount("v1", NewIndexClass()).
 		Mount("v2", NewUserClass()).
