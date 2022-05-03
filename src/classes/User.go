@@ -8,23 +8,35 @@ import (
 )
 
 type UserClass struct {
+	*goft.GormAdapter
 }
 
 func NewUserClass() *UserClass {
 	return &UserClass{}
 }
 
-func (this *UserClass) UserList(ctx *gin.Context) string {
+func (this *UserClass) UserTest(ctx *gin.Context) string {
 	return "abc"
 }
 
 func (this *UserClass) UserDetail(ctx *gin.Context) goft.Model {
-	return &models.UserModel{UserId: 101, UserName: "Hsezr"}
+	user := models.NewUserModel()
+	err := ctx.BindUri(user)
+	goft.Error(err, "ID参数不合法")
+	return user
+}
+
+func (this *UserClass) UserList(ctx *gin.Context) goft.Models {
+	users := []*models.UserModel{
+		&models.UserModel{UserId: 101, UserName: "Hsezr"},
+		&models.UserModel{UserId: 102, UserName: "zhangsan"},
+	}
+
+	return goft.MakeModels(users)
 }
 
 func (this *UserClass) Build(g *goft.Goft) {
-	g.Handle("GET", "/user1", this.UserList)
-	g.Handle("GET", "/user2", this.UserDetail)
+	g.Handle("GET", "/user1", this.UserTest)
+	g.Handle("GET", "/user/:id", this.UserDetail)
+	g.Handle("GET", "/user3", this.UserList)
 }
-
-

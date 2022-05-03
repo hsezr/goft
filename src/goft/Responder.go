@@ -7,7 +7,9 @@ import (
 )
 
 func init() {
-	ResponderList = []Responder{new(StringResponder), new(ModelResponder)}
+	ResponderList = []Responder{new(StringResponder),
+								new(ModelResponder),
+								new(ModelsResponder)}
 }
 
 type Responder interface {
@@ -16,8 +18,8 @@ type Responder interface {
 
 var ResponderList []Responder
 
+
 type StringResponder func(ctx *gin.Context) string
-type ModelResponder func(ctx *gin.Context) Model
 
 func (this StringResponder) RespondTo() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -25,9 +27,21 @@ func (this StringResponder) RespondTo() gin.HandlerFunc {
 	}
 }
 
+
+type ModelResponder func(ctx *gin.Context) Model
+
 func (this ModelResponder) RespondTo() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.JSON(200, this(ctx))
+	}
+}
+
+type ModelsResponder func (*gin.Context) Models
+
+func (this ModelsResponder) RespondTo() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.Writer.Header().Set("Content-type", "application/json")
+		ctx.Writer.WriteString(string(this(ctx)))
 	}
 }
 
