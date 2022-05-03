@@ -1,34 +1,38 @@
 package goft
 
 import (
-	"reflect"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Goft struct {
 	*gin.Engine
-	RG  *gin.RouterGroup
-	props []interface{}
+	RG          *gin.RouterGroup
+	beanFactory *BeanFactory
 }
 
 func Ignite() *Goft {
-	g := &Goft{Engine: gin.New(), props: make([]interface{}, 0)}
+	g := &Goft{Engine: gin.New(), beanFactory: NewBeanFactory()}
 	g.Use(ErrorHandler())
+	g.beanFactory.setBean(InitConfig()) //整个配置加载进bean中
 	return g
 }
 
-func (this *Goft) Launch() {
-	this.Run(":8080")
+func (this *Goft) Launch() { //最终启动函数， 不用run，没有逼格
+	//config:=InitConfig()
+	var port int32 = 8080
+	if config := this.beanFactory.GetBean(new(SysConfig)); config != nil {
+		port = config.(*SysConfig).Server.Port
+	}
+	this.Run(fmt.Sprintf(":%d", port))
 }
-
-func (this *Goft) Mount(group string, classes ...IClass) *Goft {
+func (this *Goft) Mount(group string, classes ...IClass) *Goft { // 这是挂载， 后面还需要加功能。
 	this.RG = this.Group(group)
 	for _, class := range classes {
-		class.Build(this)
-		this.setProp(class)
+		class.Build(this) //这一步是关键 。 这样在main里面 就不需要 调用了
+		this.beanFactory.inject(class)
 	}
-
 	return this
 }
 
@@ -54,31 +58,6 @@ func (this *Goft) Attach(f Fairing) *Goft {
 
 //设定数据库连接对象
 func (this *Goft) Beans(beans ...interface{}) *Goft {
-	this.props = append(this.props, beans...) 
+	this.beanFactory.setBean(beans...)
 	return this
-}
-
-func (this *Goft) getProp(t reflect.Type) interface{} {
-	for _, p := range this.props {
-		if t == reflect.TypeOf(p) {
-			return p
-		}
-	}
-	return nil
-}
-
-
-func (this *Goft) setProp(class IClass) {
-	vClass := reflect.ValueOf(class).Elem()
-	for i := 0; i < vClass.NumField(); i++ {
-		f := vClass.Field(i)
-		if !f.IsNil() || f.Kind() != reflect.Ptr {
-			continue
-		}
-
-		if p := this.getProp(f.Type()); p != nil {
-			f.Set(reflect.New(vClass.Field(0).Type().Elem()))
-			f.Elem().Set(reflect.ValueOf(p).Elem())
-		}
-	}
 }
