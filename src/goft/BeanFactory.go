@@ -1,20 +1,24 @@
 package goft
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type BeanFactory struct {
 	beans []interface{}
 }
 
 func NewBeanFactory() *BeanFactory {
-	bf := &BeanFactory{beans:make([]interface{}, 0)}
+	bf := &BeanFactory{beans: make([]interface{}, 0)}
 	bf.beans = append(bf.beans, bf)
 	return bf
 }
+
 //往内存中塞入bean
 func (this *BeanFactory) setBean(beans ...interface{}) {
 	this.beans = append(this.beans, beans...)
 }
+
 //外部使用
 func (this *BeanFactory) GetBean(bean interface{}) interface{} {
 	return this.getBean(reflect.TypeOf(bean))
@@ -29,18 +33,18 @@ func (this *BeanFactory) getBean(t reflect.Type) interface{} {
 	return nil
 }
 
-func(this *BeanFactory) Inject(object interface{}){
+func (this *BeanFactory) Inject(object interface{}) {
 
-	vObject:=reflect.ValueOf(object)
-	if vObject.Kind()==reflect.Ptr{  //由于不是控制器 ，所以传过来的值 不一定是指针。因此要做判断
-		vObject=vObject.Elem()
+	vObject := reflect.ValueOf(object)
+	if vObject.Kind() == reflect.Ptr { //由于不是控制器 ，所以传过来的值 不一定是指针。因此要做判断
+		vObject = vObject.Elem()
 	}
-	for i:=0;i<vObject.NumField();i++{
-		f:=vObject.Field(i)
-		if f.Kind()!=reflect.Ptr || !f.IsNil()   {
+	for i := 0; i < vObject.NumField(); i++ {
+		f := vObject.Field(i)
+		if f.Kind() != reflect.Ptr || !f.IsNil() {
 			continue
 		}
-		if p:=this.getBean(f.Type());p!=nil && f.CanInterface(){
+		if p := this.getBean(f.Type()); p != nil && f.CanInterface() {
 			f.Set(reflect.New(f.Type().Elem()))
 			f.Elem().Set(reflect.ValueOf(p).Elem())
 
@@ -48,7 +52,6 @@ func(this *BeanFactory) Inject(object interface{}){
 
 	}
 }
-
 
 func (this *BeanFactory) inject(class IClass) {
 	vClass := reflect.ValueOf(class).Elem()
@@ -70,6 +73,3 @@ func (this *BeanFactory) inject(class IClass) {
 		}
 	}
 }
-
-
-

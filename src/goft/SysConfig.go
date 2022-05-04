@@ -1,6 +1,7 @@
 package goft
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/go-yaml/yaml"
@@ -30,6 +31,7 @@ func InitConfig() *SysConfig {
 			log.Fatal(err)
 		}
 	}
+	fmt.Println(config)
 	return config
 }
 
