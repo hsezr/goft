@@ -7,21 +7,16 @@ import (
 )
 
 type IndexClass struct {
-	
 }
 
 func NewIndexClass() *IndexClass {
 	return &IndexClass{}
 }
 
-func (this *IndexClass) GetIndex() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"result":"index success",
-		})
-	}
+func (this *IndexClass) GetIndex(ctx *gin.Context) goft.View {
+	return "index"
 }
 
 func (this *IndexClass) Build(g *goft.Goft) {
-	g.Handle("GET", "/", this.GetIndex())
+	g.Handle("GET", "/", this.GetIndex)
 }

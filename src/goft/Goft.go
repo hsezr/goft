@@ -15,7 +15,12 @@ type Goft struct {
 func Ignite() *Goft {
 	g := &Goft{Engine: gin.New(), beanFactory: NewBeanFactory()}
 	g.Use(ErrorHandler())
-	g.beanFactory.setBean(InitConfig()) //整个配置加载进bean中
+	config := InitConfig()
+	g.beanFactory.setBean(config) //整个配置加载进bean中
+	if config.Server.Html != "" {
+		g.LoadHTMLGlob(config.Server.Html)
+	}
+
 	return g
 }
 
@@ -27,6 +32,7 @@ func (this *Goft) Launch() { //最终启动函数， 不用run，没有逼格
 	}
 	this.Run(fmt.Sprintf(":%d", port))
 }
+
 func (this *Goft) Mount(group string, classes ...IClass) *Goft { // 这是挂载， 后面还需要加功能。
 	this.RG = this.Group(group)
 	for _, class := range classes {
@@ -38,6 +44,7 @@ func (this *Goft) Mount(group string, classes ...IClass) *Goft { // 这是挂载
 
 func (this *Goft) Handle(httpMethod, relativePath string, handler interface{}) *Goft {
 	if h := Convert(handler); h != nil {
+		fmt.Println(h)
 		this.RG.Handle(httpMethod, relativePath, h)
 	}
 

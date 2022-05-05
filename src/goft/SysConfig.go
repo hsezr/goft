@@ -9,6 +9,7 @@ import (
 type ServerConfig struct {
 	Port int32
 	Name string
+	Html string
 }
 
 type UserConfig map[interface{}]interface{}
