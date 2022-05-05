@@ -34,7 +34,6 @@ func (this *BeanFactory) getBean(t reflect.Type) interface{} {
 }
 
 func (this *BeanFactory) Inject(object interface{}) {
-
 	vObject := reflect.ValueOf(object)
 	if vObject.Kind() == reflect.Ptr { //由于不是控制器 ，所以传过来的值 不一定是指针。因此要做判断
 		vObject = vObject.Elem()
@@ -47,9 +46,7 @@ func (this *BeanFactory) Inject(object interface{}) {
 		if p := this.getBean(f.Type()); p != nil && f.CanInterface() {
 			f.Set(reflect.New(f.Type().Elem()))
 			f.Elem().Set(reflect.ValueOf(p).Elem())
-
 		}
-
 	}
 }
 

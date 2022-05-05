@@ -1,7 +1,6 @@
 package goft
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/go-yaml/yaml"
@@ -31,14 +30,13 @@ func InitConfig() *SysConfig {
 			log.Fatal(err)
 		}
 	}
-	fmt.Println(config)
 	return config
 }
 
 func GetConfigValue(m UserConfig, prefix []string, idx int) interface{} {
 	key := prefix[idx]
 	if v, ok := m[key]; ok {
-		if idx == len(prefix) - 1{
+		if idx == len(prefix)-1 {
 			return v
 		} else {
 			idx = idx + 1
