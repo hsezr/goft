@@ -49,7 +49,7 @@ type ViewResponder func(ctx *gin.Context) View
 
 func (this ViewResponder) RespondTo() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.HTML(200, string(this(ctx))+".html", nil)
+		ctx.HTML(200, string(this(ctx))+".html", ctx.Keys)
 	}
 }
 

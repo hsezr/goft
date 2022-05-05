@@ -14,6 +14,7 @@ func NewIndexClass() *IndexClass {
 }
 
 func (this *IndexClass) GetIndex(ctx *gin.Context) goft.View {
+	ctx.Set("name", "zhangsan")
 	return "index"
 }
 

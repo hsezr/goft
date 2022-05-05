@@ -2,6 +2,8 @@ package goft
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,6 +20,11 @@ func Ignite() *Goft {
 	config := InitConfig()
 	g.beanFactory.setBean(config) //整个配置加载进bean中
 	if config.Server.Html != "" {
+		g.FuncMap = map[string]interface{} {
+			"Strong": func (txt string) template.HTML {
+				return template.HTML("<strong>" + txt + "</strong>")
+			},
+		}
 		g.LoadHTMLGlob(config.Server.Html)
 	}
 
@@ -30,6 +37,7 @@ func (this *Goft) Launch() { //最终启动函数， 不用run，没有逼格
 	if config := this.beanFactory.GetBean(new(SysConfig)); config != nil {
 		port = config.(*SysConfig).Server.Port
 	}
+	getCronTask().Start()
 	this.Run(fmt.Sprintf(":%d", port))
 }
 
@@ -44,7 +52,6 @@ func (this *Goft) Mount(group string, classes ...IClass) *Goft { // 这是挂载
 
 func (this *Goft) Handle(httpMethod, relativePath string, handler interface{}) *Goft {
 	if h := Convert(handler); h != nil {
-		fmt.Println(h)
 		this.RG.Handle(httpMethod, relativePath, h)
 	}
 
@@ -66,5 +73,14 @@ func (this *Goft) Attach(f Fairing) *Goft {
 //设定数据库连接对象
 func (this *Goft) Beans(beans ...interface{}) *Goft {
 	this.beanFactory.setBean(beans...)
+	return this
+}
+
+//增加定时任务
+func (this *Goft) Task(expr string, f func()) *Goft {
+	_, err := getCronTask().AddFunc(expr, f)
+	if err != nil {
+		log.Println(err)
+	}
 	return this
 }
