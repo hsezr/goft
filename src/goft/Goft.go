@@ -20,8 +20,8 @@ func Ignite() *Goft {
 	config := InitConfig()
 	g.beanFactory.setBean(config) //整个配置加载进bean中
 	if config.Server.Html != "" {
-		g.FuncMap = map[string]interface{} {
-			"Strong": func (txt string) template.HTML {
+		g.FuncMap = map[string]interface{}{
+			"Strong": func(txt string) template.HTML {
 				return template.HTML("<strong>" + txt + "</strong>")
 			},
 		}
@@ -82,5 +82,6 @@ func (this *Goft) Task(expr string, f func()) *Goft {
 	if err != nil {
 		log.Println(err)
 	}
+
 	return this
 }
