@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	. "mygin/classes"
 	"mygin/goft"
 	. "mygin/middlewares"
@@ -14,8 +13,6 @@ func main() {
 		Attach(NewUserMid()).
 		Mount("v1", NewIndexClass()).
 		Mount("v2", NewUserClass(), NewArticleClass()).
-		Task("0/3 * * * * *", func ()  {
-			log.Println("执行定时任务")
-		}).
+		Task("0/3 * * * * *", goft.Expr(".ArticleClass.Test")).
 		Launch()
 }

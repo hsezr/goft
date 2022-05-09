@@ -7,7 +7,7 @@ type ArticleModel struct {
 }
 
 func (this *ArticleModel) String() string {
-	return "!!!"
+	return "ArticleModel"
 }
 
 func NewArticleModel() *ArticleModel {

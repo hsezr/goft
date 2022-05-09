@@ -4,23 +4,27 @@ import (
 	"reflect"
 )
 
+type Bean interface{
+	Name() string
+}
+
 type BeanFactory struct {
-	beans []interface{}
+	beans []Bean
 }
 
 func NewBeanFactory() *BeanFactory {
-	bf := &BeanFactory{beans: make([]interface{}, 0)}
+	bf := &BeanFactory{beans: make([]Bean, 0)}
 	bf.beans = append(bf.beans, bf)
 	return bf
 }
 
 //往内存中塞入bean
-func (this *BeanFactory) setBean(beans ...interface{}) {
+func (this *BeanFactory) setBean(beans ...Bean) {
 	this.beans = append(this.beans, beans...)
 }
 
 //外部使用
-func (this *BeanFactory) GetBean(bean interface{}) interface{} {
+func (this *BeanFactory) GetBean(bean Bean) interface{} {
 	return this.getBean(reflect.TypeOf(bean))
 }
 
@@ -69,4 +73,8 @@ func (this *BeanFactory) inject(class IClass) {
 			f.Elem().Set(reflect.ValueOf(p).Elem())
 		}
 	}
+}
+
+func (this *BeanFactory) Name() string {
+	return "BeanFactory"
 }

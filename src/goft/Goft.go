@@ -2,8 +2,8 @@ package goft
 
 import (
 	"fmt"
-	"html/template"
 	"log"
+	"mygin/funcs"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,19 +12,16 @@ type Goft struct {
 	*gin.Engine
 	RG          *gin.RouterGroup
 	beanFactory *BeanFactory
+	exprData    map[string]interface{}
 }
 
 func Ignite() *Goft {
-	g := &Goft{Engine: gin.New(), beanFactory: NewBeanFactory()}
+	g := &Goft{Engine: gin.New(), beanFactory: NewBeanFactory(), exprData: map[string]interface{}{}}
 	g.Use(ErrorHandler())
 	config := InitConfig()
 	g.beanFactory.setBean(config) //整个配置加载进bean中
 	if config.Server.Html != "" {
-		g.FuncMap = map[string]interface{}{
-			"Strong": func(txt string) template.HTML {
-				return template.HTML("<strong>" + txt + "</strong>")
-			},
-		}
+		g.FuncMap = funcs.FuncMap
 		g.LoadHTMLGlob(config.Server.Html)
 	}
 
@@ -46,6 +43,7 @@ func (this *Goft) Mount(group string, classes ...IClass) *Goft { // 这是挂载
 	for _, class := range classes {
 		class.Build(this) //这一步是关键 。 这样在main里面 就不需要 调用了
 		this.beanFactory.inject(class)
+		this.Beans(class)
 	}
 	return this
 }
@@ -71,14 +69,29 @@ func (this *Goft) Attach(f Fairing) *Goft {
 }
 
 //设定数据库连接对象
-func (this *Goft) Beans(beans ...interface{}) *Goft {
+func (this *Goft) Beans(beans ...Bean) *Goft {
+	for _, bean := range beans {
+		this.exprData[bean.Name()] = bean
+	}
+
 	this.beanFactory.setBean(beans...)
 	return this
 }
 
 //增加定时任务
-func (this *Goft) Task(expr string, f func()) *Goft {
-	_, err := getCronTask().AddFunc(expr, f)
+func (this *Goft) Task(cron string, expr interface{}) *Goft {
+	var err error
+	if f, ok := expr.(func()); ok {
+		_, err = getCronTask().AddFunc(cron, f)
+	} else if exp, ok := expr.(Expr); ok {
+		_, err = getCronTask().AddFunc(cron, func() {
+			_, expErr := ExecExpr(exp, this.exprData)
+			if expErr != nil {
+				log.Println(expErr)
+			}
+		})
+	}
+
 	if err != nil {
 		log.Println(err)
 	}

@@ -1,6 +1,7 @@
 package classes
 
 import (
+	"log"
 	"mygin/goft"
 	"mygin/models"
 
@@ -31,4 +32,13 @@ func (this *ArticleClass) Build(goft *goft.Goft) {
 
 func (this *ArticleClass) UpdateViews(params ...interface{}) {
 	this.Table("users").Where("user_id=?", params[0]).Update("user_view", gorm.Expr("user_view+1"))
+}
+
+func (this *ArticleClass) Test() interface{} {
+	log.Println("测试定时任务")
+	return nil
+}
+
+func (this *ArticleClass) Name() string {
+	return "ArticleClass"
 }

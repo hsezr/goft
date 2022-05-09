@@ -12,7 +12,7 @@ type GormAdapter struct {
 }
 
 func NewGormAdapter() *GormAdapter {
-	db, err := gorm.Open("mysql", "root:0802hujw@tcp(192.168.8.100:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
+	db, err := gorm.Open("mysql", "root:0802hujw@tcp(192.168.1.104:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -21,4 +21,8 @@ func NewGormAdapter() *GormAdapter {
 	db.DB().SetMaxIdleConns(5)
 	db.DB().SetMaxOpenConns(10)
 	return &GormAdapter{DB: db}
+}
+
+func(this *GormAdapter) Name() string{
+	return "GormAdapter"
 }

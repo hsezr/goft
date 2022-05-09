@@ -63,14 +63,16 @@ func IsComparableExpr(expr string) bool {
 	return reg.MatchString(expr)
 }
 
-func ExecExpr(expr string, data map[string]interface{}) (string, error) {
+type Expr string
+
+func ExecExpr(expr Expr, data map[string]interface{}) (string, error) {
 	tpl := template.New("expr").Funcs(map[string]interface{} {
 		"echo": func(params ...interface{}) interface{} {
 			return fmt.Sprintf("echo:%v", params[0])
 		},
 	})
 
-	t, err := tpl.Parse(fmt.Sprintf("{{%s}}", ComparableExpr(expr).filter()))
+	t, err := tpl.Parse(fmt.Sprintf("{{%s}}",expr))
 	if err != nil {
 		return "", err
 	}
